@@ -46,7 +46,7 @@ from settings import (
 )
 from tools import TOOL_SCHEMAS as _FULL_SCHEMAS, get_schemas_by_stage
 from skills.stdlib import STDLIB_MANIFEST
-from settings import TOOL_STAGE, EXECUTOR_MODEL
+from settings import TOOL_STAGE
 
 # Apply stage filtering — expose only tools <= TOOL_STAGE
 if TOOL_STAGE > 0:
