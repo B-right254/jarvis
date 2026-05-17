@@ -8,7 +8,7 @@ from brain.ollama_client import OllamaError
 from brain.context_manager import prune_history, estimate_tokens
 from brain.prompt_builder import build_system_prompt, get_pruned_schemas
 from brain.response_parser import validate_tool_calls
-from agents.jarvis import JarvisAgent
+from agents.director import JarvisAgent
 from agents.execution import ExecutionAgent
 
 def test_system_prompt_contains_rules():
