@@ -15,7 +15,7 @@ import autonomous.task_queue
 import settings
 from autonomous.approval_gate import ApprovalGate
 from autonomous.scheduler import Scheduler
-from agents.jarvis import JarvisAgent
+from agents.director import JarvisAgent
 from agents.execution import ExecutionAgent
 from safety import executor as safety
 from settings import ITERATION_CAPS

@@ -15,6 +15,10 @@ Expansion rules are pure Python — no LLM calls, no goal drift.
 import json
 import logging
 
+from brain import ollama_client
+from brain.prompt_builder import build_executor_prompt
+from settings import EXECUTOR_MODEL
+
 logger = logging.getLogger(__name__)
 
 
@@ -257,16 +261,30 @@ def _expand_manage_window(intent: dict) -> list:
 # ── Execution Agent ──────────────────────────────────────────────────────────
 
 class ExecutionAgent:
-    """Tactical agent — expands intents into tool sequences and executes them."""
+    """Tactical agent — expands intents into tool sequences and executes them.
+
+    Known actions are handled by deterministic expanders (no LLM).
+    Unknown actions fall back to the executor LLM for tool-call planning.
+    """
 
     def __init__(self, execute_fn, verify_fn):
         self._execute = execute_fn
         self._verify = verify_fn
         self._fail_counts: dict[str, int] = {}
+        self._executor_prompt: str | None = None
+
+    def _get_executor_prompt(self) -> str:
+        """Lazily build and cache the executor system prompt."""
+        if self._executor_prompt is None:
+            self._executor_prompt = build_executor_prompt()
+        return self._executor_prompt
 
     def execute_intent(self, intent: dict) -> str:
         """
         Expand an intent into tool calls and execute them.
+
+        Known actions use deterministic expanders (fast, no LLM).
+        Unknown actions fall back to the executor LLM for planning.
 
         Returns a consolidated result string that gets fed back to Jarvis.
         """
@@ -274,7 +292,7 @@ class ExecutionAgent:
         expander_fn = EXPANDERS.get(action)
 
         if not expander_fn:
-            return f"Unknown action: '{action}'. Available: {', '.join(sorted(EXPANDERS))}"
+            return self._llm_fallback(intent)
 
         try:
             steps = expander_fn(intent)
@@ -322,6 +340,71 @@ class ExecutionAgent:
             "verification": verification.get("status", ""),
             "message": result.get("message") or result.get("output") or "",
         }
+
+    def _llm_fallback(self, intent: dict) -> str:
+        """Use the executor LLM to plan and execute an unknown action.
+
+        Sends the intent to the executor model with the executor prompt,
+        then executes any tool calls it returns.
+        """
+        action = intent.get("action", "")
+        logger.info(f"No expander for '{action}' — falling back to executor LLM")
+
+        prompt = self._get_executor_prompt()
+        user_msg = (
+            f"Execute this intent: {json.dumps(intent)}\n"
+            f"Plan the tool calls needed and execute them."
+        )
+        messages = [
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": user_msg},
+        ]
+
+        try:
+            llm_result = ollama_client.chat(
+                messages=messages,
+                model=EXECUTOR_MODEL,
+                temperature=0.1,
+                max_retries=2,
+            )
+        except Exception as e:
+            logger.error(f"Executor LLM call failed: {e}")
+            return f"Failed to plan action '{action}': LLM unavailable ({e})"
+
+        content = (llm_result.get("content") or "").strip()
+        tool_calls = llm_result.get("tool_calls")
+
+        # If the LLM returned tool calls, execute them
+        if tool_calls:
+            results = []
+            for tc in tool_calls:
+                fn = tc.get("function", {})
+                tool_name = fn.get("name", "")
+                args = fn.get("arguments", {})
+                if not tool_name:
+                    continue
+                result = self._execute(tool_name, args)
+                verification = self._verify(tool_name, result, "")
+                results.append({
+                    "tool": tool_name,
+                    "args": args,
+                    "success": result.get("success", False),
+                    "error": result.get("error"),
+                    "result": result,
+                    "verification": verification.get("status", ""),
+                    "message": result.get("message") or result.get("output") or "",
+                })
+                if not result.get("success") and intent.get("abort_on_fail", True):
+                    logger.info(f"Aborting '{action}' after failed step: {tool_name}")
+                    break
+            if results:
+                return self._format_response(action, results)
+
+        # No tool calls — return the LLM's text response
+        if content:
+            return f"Action '{action}': {content}"
+
+        return f"Unknown action: '{action}'. No expander and executor LLM returned no plan."
 
     def _format_response(self, action: str, results: list) -> str:
         """Build a readable result string for Jarvis."""

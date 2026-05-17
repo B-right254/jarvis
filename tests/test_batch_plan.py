@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from agents.jarvis import JarvisAgent
+from agents.director import JarvisAgent
 from agents.execution import ExecutionAgent, EXPANDERS
 
 
