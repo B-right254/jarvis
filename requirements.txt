@@ -1,0 +1,30 @@
+
+# LLM & API
+ollama
+requests
+python-dotenv
+
+# Vector DB & Embeddings
+chromadb
+sentence-transformers
+
+# Windows Control & Automation
+pygetwindow
+pyautogui
+pywin32
+psutil
+pillow
+win10toast
+
+# Voice I/O
+SpeechRecognition
+pyaudio
+openwakeword
+
+# Verification & Utilities
+pytesseract
+pytest
+
+# Calendar (time_calendar tool) — both optional; ics backend needs icalendar
+icalendar
+tzlocal

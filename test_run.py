@@ -1,0 +1,1 @@
+import sys, os; sys.path.append('C:/Users/macha/OneDrive/Desktop/Ai/jarvis'); from core.orchestrator import Orchestrator; o=Orchestrator(); print(o.handle('open notepad')); print(o.handle('write hello world'))

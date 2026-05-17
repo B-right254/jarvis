@@ -1,0 +1,1168 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anomalyco/opencode/main/tools/schemas.json",
+  "open_app": {
+    "stage": 1,
+    "domain": "window",
+    "description": "Launch an installed application by name",
+    "input": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Application name (e.g. 'Chrome', 'Notepad')"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  },
+  "close_app": {
+    "stage": 1,
+    "domain": "window",
+    "description": "Close a running application by name",
+    "input": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Application name (e.g. 'Chrome', 'Notepad')"
+        },
+        "force": {
+          "type": "boolean",
+          "description": "Force close if not responding (default false)"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  },
+  "focus_window": {
+    "stage": 1,
+    "domain": "window",
+    "description": "Bring a window to the foreground by title or process name",
+    "input": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Window title to match (partial match ok)"
+        },
+        "process": {
+          "type": "string",
+          "description": "Process name to match (e.g. 'chrome')"
+        }
+      },
+      "required": []
+    }
+  },
+  "minimize_window": {
+    "stage": 1,
+    "domain": "window",
+    "description": "Minimize a window by title or process name",
+    "input": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Window title to match"
+        },
+        "process": {
+          "type": "string",
+          "description": "Process name to match"
+        }
+      },
+      "required": []
+    }
+  },
+  "maximize_window": {
+    "stage": 1,
+    "domain": "window",
+    "description": "Maximize a window by title or process name, or restore it if already maximized",
+    "input": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Window title to match"
+        },
+        "process": {
+          "type": "string",
+          "description": "Process name to match"
+        }
+      },
+      "required": []
+    }
+  },
+  "get_active_window": {
+    "stage": 1,
+    "domain": "window",
+    "description": "Get the title and process name of the currently focused window",
+    "input": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  "lock_screen": {
+    "stage": 1,
+    "domain": "system",
+    "description": "Lock the workstation immediately",
+    "input": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  "shutdown": {
+    "stage": 1,
+    "domain": "system",
+    "description": "Shut down the computer",
+    "input": {
+      "type": "object",
+      "properties": {
+        "_confirmed": {
+          "type": "boolean",
+          "description": "Must be set to True after getting explicit user confirmation"
+        }
+      },
+      "required": [
+        "_confirmed"
+      ]
+    }
+  },
+  "restart": {
+    "stage": 1,
+    "domain": "system",
+    "description": "Restart the computer",
+    "input": {
+      "type": "object",
+      "properties": {
+        "_confirmed": {
+          "type": "boolean",
+          "description": "Must be set to True after getting explicit user confirmation"
+        }
+      },
+      "required": [
+        "_confirmed"
+      ]
+    }
+  },
+  "screenshot": {
+    "stage": 1,
+    "domain": "perception",
+    "description": "Capture a screenshot of the primary monitor or a region",
+    "input": {
+      "type": "object",
+      "properties": {
+        "region": {
+          "type": "object",
+          "description": "Optional crop: {left, top, width, height}. Omit for full screen."
+        }
+      },
+      "required": []
+    }
+  },
+  "read_screen": {
+    "stage": 1,
+    "domain": "perception",
+    "description": "Extract visible text from the screen via OCR",
+    "input": {
+      "type": "object",
+      "properties": {
+        "region": {
+          "type": "object",
+          "description": "Optional crop: {left, top, width, height}. Omit for full screen."
+        }
+      },
+      "required": []
+    }
+  },
+  "click": {
+    "stage": 1,
+    "domain": "input",
+    "description": "Click at screen coordinates or on a verified UI element. When verify_text is set, the click target is cross-referenced with OCR for two-phase grounding — safer than blindly trusting LLM-provided coordinates.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X coordinate (pixels from left)"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y coordinate (pixels from top)"
+        },
+        "button": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right",
+            "middle"
+          ],
+          "description": "Mouse button (default left)"
+        },
+        "verify_text": {
+          "type": "string",
+          "description": "Optional: text label to verify before clicking. Uses OCR to find the element and clicks its verified center instead of raw x,y — prevents clicking hallucinated coordinates."
+        }
+      },
+      "required": []
+    }
+  },
+  "double_click": {
+    "stage": 1,
+    "domain": "input",
+    "description": "Double-click at screen coordinates",
+    "input": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X coordinate (pixels from left)"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y coordinate (pixels from top)"
+        }
+      },
+      "required": []
+    }
+  },
+  "right_click": {
+    "stage": 1,
+    "domain": "input",
+    "description": "Right-click at screen coordinates",
+    "input": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X coordinate (pixels from left)"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y coordinate (pixels from top)"
+        }
+      },
+      "required": []
+    }
+  },
+  "move_mouse": {
+    "stage": 1,
+    "domain": "input",
+    "description": "Move the mouse cursor to screen coordinates",
+    "input": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "integer",
+          "description": "X coordinate (pixels from left)"
+        },
+        "y": {
+          "type": "integer",
+          "description": "Y coordinate (pixels from top)"
+        },
+        "duration": {
+          "type": "number",
+          "description": "Duration of the movement in seconds (default 0.2)"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ]
+    }
+  },
+  "drag": {
+    "stage": 1,
+    "domain": "input",
+    "description": "Drag the mouse from one point to another (click-hold-move-release)",
+    "input": {
+      "type": "object",
+      "properties": {
+        "start_x": {
+          "type": "integer",
+          "description": "Starting X coordinate"
+        },
+        "start_y": {
+          "type": "integer",
+          "description": "Starting Y coordinate"
+        },
+        "end_x": {
+          "type": "integer",
+          "description": "Ending X coordinate"
+        },
+        "end_y": {
+          "type": "integer",
+          "description": "Ending Y coordinate"
+        },
+        "duration": {
+          "type": "number",
+          "description": "Duration of the drag in seconds (default 0.3)"
+        }
+      },
+      "required": [
+        "start_x",
+        "start_y",
+        "end_x",
+        "end_y"
+      ]
+    }
+  },
+  "type_text": {
+    "stage": 1,
+    "domain": "input",
+    "description": "Type text into the currently focused window",
+    "input": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Text to type"
+        },
+        "enter": {
+          "type": "boolean",
+          "description": "Press Enter after typing (default false)"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    }
+  },
+  "press_keys": {
+    "stage": 1,
+    "domain": "input",
+    "description": "Press keyboard shortcuts (e.g. Ctrl+C, Alt+Tab)",
+    "input": {
+      "type": "object",
+      "properties": {
+        "keys": {
+          "type": "string",
+          "description": "Keys to press, e.g. 'ctrl+c', 'alt+tab', 'ctrl+shift+esc'"
+        }
+      },
+      "required": [
+        "keys"
+      ]
+    }
+  },
+  "scroll": {
+    "stage": 1,
+    "domain": "input",
+    "description": "Scroll the active window",
+    "input": {
+      "type": "object",
+      "properties": {
+        "clicks": {
+          "type": "integer",
+          "description": "Number of scroll ticks. Negative = up, positive = down (default -3)"
+        }
+      },
+      "required": []
+    }
+  },
+  "set_volume": {
+    "stage": 1,
+    "domain": "perception",
+    "description": "Set the system speaker volume level",
+    "input": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "integer",
+          "description": "Volume level 0-100 (0=mute, 100=max)"
+        }
+      },
+      "required": [
+        "level"
+      ]
+    }
+  },
+  "list_running_apps": {
+    "stage": 2,
+    "domain": "window",
+    "description": "List all running applications with window titles and process names",
+    "input": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  "get_process_info": {
+    "stage": 2,
+    "domain": "process",
+    "description": "Get detailed information about running processes",
+    "input": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Filter by process name (optional)"
+        },
+        "sort_by": {
+          "type": "string",
+          "enum": [
+            "name",
+            "cpu",
+            "memory"
+          ],
+          "description": "Sort by field (default: memory)"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Max processes to return (default 20)"
+        }
+      },
+      "required": []
+    }
+  },
+  "kill_process": {
+    "stage": 2,
+    "domain": "process",
+    "description": "Terminate a running process by name or PID",
+    "input": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Process name to kill (e.g. 'chrome', 'notepad')"
+        },
+        "pid": {
+          "type": "integer",
+          "description": "Process ID to kill (alternative to name)"
+        },
+        "force": {
+          "type": "boolean",
+          "description": "Force kill if not responding (default true)"
+        }
+      },
+      "required": []
+    }
+  },
+  "get_system_stats": {
+    "stage": 2,
+    "domain": "process",
+    "description": "Report CPU, RAM, disk, and battery level/status via system APIs. Use this for battery percentage queries — do NOT use screenshot or read_screen for battery info.",
+    "input": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  "search_files": {
+    "stage": 2,
+    "domain": "filesystem",
+    "description": "Search for files and folders by name pattern",
+    "input": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string",
+          "description": "File name pattern (e.g. '*.pdf', 'report*')"
+        },
+        "location": {
+          "type": "string",
+          "description": "Directory to search (defaults to desktop)"
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Maximum results (default 20)"
+        }
+      },
+      "required": [
+        "pattern"
+      ]
+    }
+  },
+  "open_file": {
+    "stage": 2,
+    "domain": "filesystem",
+    "description": "Open a file with its default application",
+    "input": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Full path to the file"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
+  },
+  "read_file": {
+    "stage": 2,
+    "domain": "filesystem",
+    "description": "Read the contents of a text file",
+    "input": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Full path to the file"
+        },
+        "max_chars": {
+          "type": "integer",
+          "description": "Max characters to read (default 5000)"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
+  },
+  "write_file": {
+    "stage": 2,
+    "domain": "filesystem",
+    "description": "Create or overwrite a text file",
+    "input": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Full path to the file"
+        },
+        "content": {
+          "type": "string",
+          "description": "File contents"
+        }
+      },
+      "required": [
+        "path",
+        "content"
+      ]
+    }
+  },
+  "delete_file": {
+    "stage": 2,
+    "domain": "filesystem",
+    "description": "Delete a file or empty folder permanently",
+    "input": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Full path to the file or folder"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
+  },
+  "move_file": {
+    "stage": 2,
+    "domain": "filesystem",
+    "description": "Move or rename a file or folder",
+    "input": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Current full path"
+        },
+        "destination": {
+          "type": "string",
+          "description": "New full path"
+        }
+      },
+      "required": [
+        "source",
+        "destination"
+      ]
+    }
+  },
+  "run_python": {
+    "stage": 2,
+    "domain": "code",
+    "description": "Execute Python code only (not PowerShell). Use for quick calculations, data transforms, or small scripts. For PowerShell or background tasks, use execute_code instead.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Python code to execute"
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Max seconds (default 30)"
+        }
+      },
+      "required": [
+        "code"
+      ]
+    }
+  },
+  "detect_ui_elements": {
+    "stage": 3,
+    "domain": "perception",
+    "description": "Detect UI elements on screen via OCR. Use with element_type 'text' to find text labels. Use vision_query instead for images/thumbnails — OCR cannot detect images.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Optional text to search for on screen"
+        },
+        "element_type": {
+          "type": "string",
+          "enum": [
+            "button",
+            "text",
+            "input",
+            "image",
+            "all"
+          ],
+          "description": "Type of UI element to detect (default: all). Note: OCR-based — only works for text elements, image type is accepted but better handled by vision_query."
+        },
+        "region": {
+          "type": "object",
+          "description": "Optional region: {left, top, width, height}"
+        }
+      },
+      "required": []
+    }
+  },
+  "web_search": {
+    "stage": 4,
+    "domain": "web",
+    "description": "Search the web and return results with snippets and URLs",
+    "input": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search query"
+        },
+        "max_results": {
+          "type": "integer",
+          "description": "Number of results (default 5)"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  "open_url": {
+    "stage": 4,
+    "domain": "web",
+    "description": "Open a URL in the default web browser",
+    "input": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Full URL including protocol (e.g. https://...)"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  "fetch_page": {
+    "stage": 4,
+    "domain": "web",
+    "description": "Fetch and return the text content of a webpage",
+    "input": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Full URL to fetch"
+        },
+        "max_chars": {
+          "type": "integer",
+          "description": "Max characters (default 10000)"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  "store_memory": {
+    "stage": 4,
+    "domain": "memory",
+    "description": "Save a fact or preference to long-term memory",
+    "input": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Unique key for the fact"
+        },
+        "value": {
+          "description": "Value to store (any JSON type)"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ]
+    }
+  },
+  "retrieve_memory": {
+    "stage": 4,
+    "domain": "memory",
+    "description": "Retrieve a fact or preference from long-term memory by key",
+    "input": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Key to look up"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
+  },
+  "forget_memory": {
+    "stage": 4,
+    "domain": "memory",
+    "description": "Delete a key from long-term memory",
+    "input": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Key to delete"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    }
+  },
+  "search_memory": {
+    "stage": 4,
+    "domain": "memory",
+    "description": "Full-text search across episodic history and stored facts",
+    "input": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Search text"
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Max results (default 10)"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  },
+  "send_message": {
+    "stage": 4,
+    "domain": "comms",
+    "description": "Send a message via email or Telegram",
+    "input": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "type": "string",
+          "description": "Recipient email or handle"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Message subject"
+        },
+        "body": {
+          "type": "string",
+          "description": "Message body"
+        }
+      },
+      "required": [
+        "body"
+      ]
+    }
+  },
+  "speak": {
+    "stage": 4,
+    "domain": "comms",
+    "description": "Speak text aloud through the speakers",
+    "input": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Text to speak"
+        }
+      },
+      "required": [
+        "text"
+      ]
+    }
+  },
+  "update_memory": {
+    "stage": 4,
+    "domain": "memory",
+    "description": "Update an existing stored memory value by key",
+    "input": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Key to update"
+        },
+        "value": {
+          "description": "New value (any JSON type)"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ]
+    }
+  },
+  "summarize_session": {
+    "stage": 4,
+    "domain": "memory",
+    "description": "Get a summary of recent session activity and stored memories",
+    "input": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "description": "Max results (default 10)"
+        }
+      },
+      "required": []
+    }
+  },
+  "get_battery": {
+    "stage": 1,
+    "domain": "perception",
+    "description": "Get battery percentage, charging status, and estimated time remaining. Use this for any battery query.",
+    "input": {
+      "type": "object",
+      "properties": {}
+    }
+  },
+  "list_installed_apps": {
+    "stage": 1,
+    "domain": "window",
+    "description": "Search installed apps by name. Use this to discover installed software. Note: open_app can launch many apps by name alone without calling this first.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Optional search term to filter apps"
+        }
+      },
+      "required": []
+    }
+  },
+  "set_brightness": {
+    "stage": 2,
+    "domain": "perception",
+    "description": "Set screen brightness level. Uses WMI to adjust monitor brightness.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "integer",
+          "description": "Brightness level 0-100"
+        }
+      },
+      "required": [
+        "level"
+      ]
+    }
+  },
+  "minimize_all_except": {
+    "stage": 2,
+    "domain": "window",
+    "description": "Minimize all open windows except the specified one. Use press_keys('win+d')+focus_window instead if you just need the desktop.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "exclude_titles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Window titles or process names to leave open (e.g. ['AnyDesk', 'Chrome'])"
+        }
+      },
+      "required": []
+    }
+  },
+  "vision_query": {
+    "stage": 3,
+    "domain": "perception",
+    "description": "Capture the screen and ask gemma3:27b a visual question about what it shows. Use this when you need to read UI text, detect dialogs, find element positions, or describe visual content.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "Specific question about what is on screen"
+        },
+        "region": {
+          "type": "object",
+          "description": "Optional crop: {left, top, width, height}. Omit for full screen."
+        }
+      },
+      "required": [
+        "question"
+      ]
+    }
+  },
+  "create_file": {
+    "stage": 2,
+    "domain": "filesystem",
+    "description": "Create a new empty file",
+    "input": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Full path for the new file"
+        }
+      },
+      "required": [
+        "path"
+      ]
+    }
+  },
+  "schedule": {
+    "stage": 4,
+    "domain": "scheduling",
+    "description": "Schedule, cancel, or list timed/recurring tasks. Actions: add (requires command + when), cancel (requires task_id), list.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "add",
+            "cancel",
+            "list"
+          ],
+          "description": "Action to perform"
+        },
+        "command": {
+          "type": "string",
+          "description": "Command to schedule (required for add)"
+        },
+        "when": {
+          "type": "string",
+          "description": "Schedule expression: 'in 10 minutes', 'at 09:00', 'every day at 07:30', 'on Monday at 09:00'"
+        },
+        "task_id": {
+          "type": "string",
+          "description": "Task ID to cancel (required for cancel)"
+        }
+      },
+      "required": [
+        "action"
+      ]
+    }
+  },
+  "listen": {
+    "stage": 4,
+    "domain": "comms",
+    "description": "Listen for a spoken response from the user. Optionally speak a prompt first. Returns transcribed text.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "description": "Optional text to speak before listening"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Seconds to wait for speech (default 10)"
+        },
+        "speak_prompt": {
+          "type": "boolean",
+          "description": "Speak the prompt via TTS (default true)"
+        }
+      }
+    }
+  },
+  "time_calendar": {
+    "stage": 4,
+    "domain": "scheduling",
+    "description": "Get current time/date or manage calendar events. Actions: get_time, get_events (days), create_event (subject, start), delete_event (subject, date). Supports Outlook and ICS backends.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "get_time",
+            "get_events",
+            "create_event",
+            "delete_event"
+          ],
+          "description": "Action to perform"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Event subject (required for create/delete)"
+        },
+        "start": {
+          "type": "string",
+          "description": "Start datetime ISO string (required for create)"
+        },
+        "end": {
+          "type": "string",
+          "description": "End datetime ISO string"
+        },
+        "days": {
+          "type": "integer",
+          "description": "Days ahead to query (default 7, used with get_events)"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date filter YYYY-MM-DD for delete"
+        },
+        "location": {
+          "type": "string",
+          "description": "Event location"
+        },
+        "all_day": {
+          "type": "boolean",
+          "description": "All-day event flag"
+        }
+      },
+      "required": [
+        "action"
+      ]
+    }
+  },
+  "data_analysis": {
+    "stage": 3,
+    "domain": "data",
+    "description": "Analyze structured data using pandas. Input data as CSV text, get summary statistics and visualizations.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "description": "CSV data or Python expression to analyze"
+        },
+        "operations": {
+          "type": "string",
+          "description": "Operations to perform: describe, head, correlation, plot, custom"
+        }
+      },
+      "required": [
+        "data"
+      ]
+    }
+  },
+  "execute_code": {
+    "stage": 2,
+    "domain": "code",
+    "description": "Execute Python or PowerShell code. Supports background tasks, timeout, and sandboxed execution with import guard. Use for: running scripts, automation, system queries, installing packages. For Python-only quick tasks, prefer run_python.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Code to execute"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "python",
+            "powershell"
+          ],
+          "description": "Language (default python)"
+        },
+        "background": {
+          "type": "boolean",
+          "description": "Run in background (returns PID)"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "run",
+            "check",
+            "wait",
+            "kill",
+            "list"
+          ],
+          "description": "Action for background process control"
+        },
+        "pid": {
+          "type": "integer",
+          "description": "Process ID for background actions"
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Max seconds (default 60)"
+        }
+      },
+      "required": [
+        "code"
+      ]
+    }
+  },
+  "download_file": {
+    "stage": 3,
+    "domain": "filesystem",
+    "description": "Download a file from a URL to a local path",
+    "input": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "URL to download from"
+        },
+        "path": {
+          "type": "string",
+          "description": "Local path to save to"
+        }
+      },
+      "required": [
+        "url",
+        "path"
+      ]
+    }
+  },
+  "wait": {
+    "stage": 1,
+    "domain": "system",
+    "description": "Pause execution or wait for a condition. Use 'condition' + 'target' to wait for events: process_running, process_gone, window_visible, text_visible, cpu_idle. Falls back to blind sleep if no condition given.",
+    "input": {
+      "type": "object",
+      "properties": {
+        "ms": {
+          "type": "integer",
+          "description": "Fallback milliseconds to sleep (default 1000). Only used when no condition specified."
+        },
+        "condition": {
+          "type": "string",
+          "enum": [
+            "process_running",
+            "process_gone",
+            "window_visible",
+            "text_visible",
+            "cpu_idle"
+          ],
+          "description": "Event to wait for. Polls until condition is met or timeout."
+        },
+        "target": {
+          "type": "string",
+          "description": "Target for the condition: process name, window title, or CPU threshold (0-100)."
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "description": "Max time to wait for the condition (defaults to 2x ms)."
+        }
+      },
+      "required": []
+    }
+  }
+}
