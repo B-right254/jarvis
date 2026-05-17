@@ -46,7 +46,7 @@ from settings import (
 )
 from tools import TOOL_SCHEMAS as _FULL_SCHEMAS, get_schemas_by_stage
 from skills.stdlib import STDLIB_MANIFEST
-from settings import TOOL_STAGE
+from settings import TOOL_STAGE, EXECUTOR_MODEL
 
 # Apply stage filtering — expose only tools <= TOOL_STAGE
 if TOOL_STAGE > 0:
@@ -175,6 +175,27 @@ def build_stdlib_skills_block() -> str:
         except Exception as exc:
             logger.debug(f"prompt_builder: skipping stdlib entry '{mod_key}' — {exc}")
     return "\n".join(lines) if lines else "  (no stdlib skills registered)"
+
+
+def build_executor_prompt(tool_schemas: list[dict] | None = None) -> str:
+    """
+    Build the system prompt for the Execution Agent.
+
+    Loads the executor.yaml template and injects the tool schemas so the
+    executor LLM knows which tools are available and their parameters.
+    """
+    prompt_template = _load_prompt("executor")
+    schemas_block = ""
+    if tool_schemas:
+        import json
+        schemas_block = json.dumps(tool_schemas, indent=2)
+    else:
+        schemas_block = _build_tool_list()
+    try:
+        return prompt_template.format(schemas=schemas_block)
+    except Exception as exc:
+        logger.warning(f"build_executor_prompt formatting failed: {exc}")
+        return prompt_template
 
 
 def build_system_prompt() -> str:
