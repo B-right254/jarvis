@@ -21,6 +21,7 @@ Do NOT redeclare schemas anywhere else.
 from __future__ import annotations
 
 import datetime
+import json
 import logging
 import os
 import platform
@@ -187,7 +188,6 @@ def build_executor_prompt(tool_schemas: list[dict] | None = None) -> str:
     prompt_template = _load_prompt("executor")
     schemas_block = ""
     if tool_schemas:
-        import json
         schemas_block = json.dumps(tool_schemas, indent=2)
     else:
         schemas_block = _build_tool_list()
